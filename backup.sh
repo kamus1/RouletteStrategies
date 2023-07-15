@@ -140,9 +140,6 @@ function inverseLabrouchere(){
   bet=$((${my_sequence[0]} + ${my_sequence[-1]}))
 
   jugadas_totales=0
-  bet_to_renew=$(($money+50)) # Dinero el cual una vez alcanzado hará que renovemos nuestra secuencia a [1 2 3 4]
-
-  echo -e "[+] El tope a renovar está establecido por encima de los $bet_to_renew$"
 
   tput civis
   #bucle
@@ -152,7 +149,6 @@ function inverseLabrouchere(){
     money=$(($money - $bet))
     
     if [ ! "$money" -lt 0 ]; then
-
       echo -e "[+] Invertimos $bet$"
       echo -e "[+] Tenemos $money$" 
       
@@ -165,52 +161,23 @@ function inverseLabrouchere(){
           let money+=$reward
           echo -e "[+] Tienes $money$"
 
-          if [ $money -ge $bet_to_renew ]; then
-            echo -e "[+] Se ha superado el tope establecido de $bet_to_renew$ para renovar nuestra secuencia"
-            bet_to_renew=$(($bet_to_renew + 50))
-            echo -e "[+] El tope se ha establecido en $bet_to_renew"
-            my_sequence=(1 2 3 4)
-            echo -e "[+] La secuencia ha sido restablecida a: [${my_sequence[@]}]"
+          my_sequence+=($bet)
+          my_sequence=(${my_sequence[@]}) # por tema de las posiciones, por seguridad
+
+          echo -e "[+] Nuestra nueva secuencia es ${greenColor}[${my_sequence[@]}]${endColor}"
+
+          if [ "${#my_sequence[@]}" -ne 1 ] && [ "${#my_sequence[@]}" -ne 0 ]; then
             bet=$((${my_sequence[0]} + ${my_sequence[-1]}))
-          elif [ $money -lt $(($bet_to_renew-100)) ]; then 
-            echo -e "[+] Hemos llegado a un mínimo crítico, se procede a reajustar el tope"
-            bet_to_renew=$(($bet_to_renew - 50))
-            echo -e "[+] El tope ha sido renovado a $bet_to_renew$"
-
-            my_sequence+=($bet)
-            my_sequence=(${my_sequence[@]}) # por tema de las posiciones, por seguridad
-
-            echo -e "[+] Nuestra nueva secuencia es ${greenColor}[${my_sequence[@]}]${endColor}"
-
-            if [ "${#my_sequence[@]}" -ne 1 ] && [ "${#my_sequence[@]}" -ne 0 ]; then
-              bet=$((${my_sequence[0]} + ${my_sequence[-1]}))
-            
-            elif [ "${#my_sequence[@]}" -eq 1 ]; then
-              bet=${my_sequence[0]}
-            else
-              echo -e "[!] Hemos perdido nuestra secuencia"
-              my_sequence=(1 2 3 4)
-              echo -e "[+] Restablecemos la secuencia a [${my_sequence[@]}]"
-              bet=$((${my_sequence[0]} + ${my_sequence[-1]}))
-            fi    
+          
+          elif [ "${#my_sequence[@]}" -eq 1 ]; then
+            bet=${my_sequence[0]}
           else
-            my_sequence+=($bet)
-            my_sequence=(${my_sequence[@]}) # por tema de las posiciones, por seguridad
+            echo -e "[!] Hemos perdido nuestra secuencia"
+            my_sequence=(1 2 3 4)
+            echo -e "[+] Restablecemos la secuencia a [${my_sequence[@]}]"
+            bet=$((${my_sequence[0]} + ${my_sequence[-1]}))
+          fi          
 
-            echo -e "[+] Nuestra nueva secuencia es ${greenColor}[${my_sequence[@]}]${endColor}"
-
-            if [ "${#my_sequence[@]}" -ne 1 ] && [ "${#my_sequence[@]}" -ne 0 ]; then
-              bet=$((${my_sequence[0]} + ${my_sequence[-1]}))
-            
-            elif [ "${#my_sequence[@]}" -eq 1 ]; then
-              bet=${my_sequence[0]}
-            else
-              echo -e "[!] Hemos perdido nuestra secuencia"
-              my_sequence=(1 2 3 4)
-              echo -e "[+] Restablecemos la secuencia a [${my_sequence[@]}]"
-              bet=$((${my_sequence[0]} + ${my_sequence[-1]}))
-            fi          
-          fi
         elif [ "$((random_number % 2))" -eq 1 ] || [ "$random_number" -eq 0 ]; then
           if [ "$((random_number % 2))" -eq 1 ]; then
             echo -e "[+] El número es impar, ${redColor}¡pierdes!${endColor}"
@@ -239,7 +206,7 @@ function inverseLabrouchere(){
       fi
     else
       echo -e "\n${redColor}[!] Te has quedado sin dinero.${endColor}"
-      echo -e "[+] En total han habido ${yellowColor}$jugadas_totales${endColor} jugadas totales"
+      echo -e "[+] En total han habido ${yellowColor}$jugadas_totales${endColor} j ugadas totales"
       tput cnorm && exit 1 
 
     fi
